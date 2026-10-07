@@ -1,0 +1,1170 @@
+```html
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Massage OS</title>
+    <meta name="description" content="Aplikasi manajemen usaha massage, terapi, dan spa rumahan.">
+    <meta name="theme-color" content="#0d9488">
+    <style>
+        /* CSS VARIABLES & THEMING */
+        :root {
+            --bg-base: #f8fafc;
+            --bg-surface: #ffffff;
+            --bg-surface-hover: #f1f5f9;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --primary: #0d9488;
+            --primary-hover: #0f766e;
+            --secondary: #e2e8f0;
+            --secondary-hover: #cbd5e1;
+            --danger: #ef4444;
+            --danger-hover: #dc2626;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --border: #e2e8f0;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --radius: 12px;
+            --nav-height: 65px;
+        }
+
+        [data-theme="dark"] {
+            --bg-base: #0f172a;
+            --bg-surface: #1e293b;
+            --bg-surface-hover: #334155;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border: #334155;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+        }
+
+        /* RESET & BASE */
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+        body { background-color: var(--bg-base); color: var(--text-main); line-height: 1.5; padding-bottom: calc(var(--nav-height) + 20px); transition: background-color 0.3s, color 0.3s; }
+        h1, h2, h3, h4 { color: var(--text-main); margin-bottom: 0.5rem; }
+        a { color: var(--primary); text-decoration: none; }
+        button { cursor: pointer; font-family: inherit; }
+        
+        /* ACCESSIBILITY */
+        .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border-width: 0; }
+        :focus-visible { outline: 3px solid var(--primary); outline-offset: 2px; }
+
+        /* LAYOUT & COMPONENTS */
+        .header { background: var(--bg-surface); padding: 1rem; position: sticky; top: 0; z-index: 40; box-shadow: 0 1px 3px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); }
+        .header-title { font-size: 1.25rem; font-weight: bold; color: var(--primary); display: flex; align-items: center; gap: 8px;}
+        .container { padding: 1rem; max-width: 800px; margin: 0 auto; }
+        
+        .view { display: none; animation: fadeIn 0.3s ease; }
+        .view.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        .card { background: var(--bg-surface); border-radius: var(--radius); padding: 1rem; margin-bottom: 1rem; box-shadow: var(--shadow); border: 1px solid var(--border); }
+        .grid { display: grid; gap: 1rem; }
+        .grid-2 { grid-template-columns: repeat(2, 1fr); }
+        @media(max-width: 400px) { .grid-2 { grid-template-columns: 1fr; } }
+        
+        .stat-card { border-left: 4px solid var(--primary); padding: 1rem; background: var(--bg-surface); border-radius: 8px; box-shadow: var(--shadow); border-top: 1px solid var(--border); border-right: 1px solid var(--border); border-bottom: 1px solid var(--border);}
+        .stat-value { font-size: 1.5rem; font-weight: bold; margin-top: 0.25rem; }
+
+        /* FORMS & BUTTONS */
+        .form-group { margin-bottom: 1rem; }
+        .form-label { display: block; margin-bottom: 0.5rem; font-weight: 500; font-size: 0.9rem; }
+        .form-control { width: 100%; padding: 0.75rem; border: 1px solid var(--border); border-radius: 8px; background: var(--bg-base); color: var(--text-main); font-size: 1rem; transition: border-color 0.2s; }
+        .form-control:focus { outline: none; border-color: var(--primary); }
+        select.form-control { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 0.75rem center; background-size: 1em; padding-right: 2.5rem; }
+        textarea.form-control { min-height: 80px; resize: vertical; }
+        
+        .btn { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.75rem 1rem; border: none; border-radius: 8px; font-size: 1rem; font-weight: 600; text-align: center; transition: background-color 0.2s, opacity 0.2s; min-height: 48px; } /* 48px min for touch targets */
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .btn-primary { background: var(--primary); color: #fff; }
+        .btn-primary:hover:not(:disabled) { background: var(--primary-hover); }
+        .btn-secondary { background: var(--secondary); color: #1e293b; }
+        .btn-secondary:hover:not(:disabled) { background: var(--secondary-hover); }
+        .btn-danger { background: var(--danger); color: #fff; }
+        .btn-danger:hover:not(:disabled) { background: var(--danger-hover); }
+        .btn-block { width: 100%; }
+        .btn-sm { padding: 0.4rem 0.8rem; font-size: 0.875rem; min-height: 36px; }
+
+        /* LISTS & ITEMS */
+        .list-item { background: var(--bg-surface); border: 1px solid var(--border); border-radius: 8px; padding: 1rem; margin-bottom: 0.75rem; display: flex; flex-direction: column; gap: 0.5rem; }
+        .list-header { display: flex; justify-content: space-between; align-items: flex-start; }
+        .list-title { font-weight: bold; font-size: 1.1rem; }
+        .list-actions { display: flex; gap: 0.5rem; margin-top: 0.5rem; flex-wrap: wrap;}
+        .badge { padding: 0.25rem 0.5rem; border-radius: 999px; font-size: 0.75rem; font-weight: bold; text-transform: uppercase; }
+        .badge-success { background: rgba(16, 185, 129, 0.1); color: var(--success); }
+        .badge-danger { background: rgba(239, 68, 68, 0.1); color: var(--danger); }
+
+        /* BOTTOM NAV */
+        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; height: var(--nav-height); background: var(--bg-surface); border-top: 1px solid var(--border); display: flex; justify-content: space-around; align-items: center; z-index: 40; padding-bottom: env(safe-area-inset-bottom); }
+        .nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text-muted); background: none; border: none; width: 100%; height: 100%; font-size: 0.7rem; gap: 4px; border-radius: 0;}
+        .nav-item.active { color: var(--primary); font-weight: bold; }
+        .nav-item svg { width: 24px; height: 24px; fill: currentColor; }
+
+        /* MODALS & TOASTS */
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 100; padding: 1rem; backdrop-filter: blur(2px); }
+        .modal-overlay.active { display: flex; animation: fadeIn 0.2s; }
+        .modal { background: var(--bg-surface); width: 100%; max-width: 500px; border-radius: var(--radius); max-height: 90vh; display: flex; flex-direction: column; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); }
+        .modal-header { padding: 1rem 1.5rem; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+        .modal-body { padding: 1.5rem; overflow-y: auto; }
+        .modal-footer { padding: 1rem 1.5rem; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 0.5rem; }
+        .close-btn { background: none; border: none; font-size: 1.5rem; color: var(--text-muted); padding: 0.5rem; min-width: 48px; min-height: 48px; display: flex; align-items: center; justify-content: center;}
+        
+        #toast-container { position: fixed; top: 1rem; left: 50%; transform: translateX(-50%); z-index: 200; display: flex; flex-direction: column; gap: 0.5rem; width: 90%; max-width: 400px; pointer-events: none; }
+        .toast { background: var(--text-main); color: var(--bg-base); padding: 1rem; border-radius: 8px; text-align: center; font-weight: 500; box-shadow: var(--shadow); animation: slideDown 0.3s forwards, fadeOut 0.3s forwards 2.7s; }
+        @keyframes slideDown { from { transform: translateY(-100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
+
+        /* UTILITIES */
+        .text-center { text-align: center; } .text-right { text-align: right; }
+        .text-muted { color: var(--text-muted); } .text-primary { color: var(--primary); }
+        .font-bold { font-weight: bold; }
+        .mt-1 { margin-top: 0.5rem; } .mt-2 { margin-top: 1rem; } .mt-4 { margin-top: 2rem; }
+        .mb-1 { margin-bottom: 0.5rem; } .mb-2 { margin-bottom: 1rem; }
+        .flex-between { display: flex; justify-content: space-between; align-items: center; }
+        .empty-state { text-align: center; padding: 3rem 1rem; color: var(--text-muted); background: var(--bg-surface); border-radius: var(--radius); border: 1px dashed var(--border); }
+
+        /* PRINT STYLES */
+        @media print {
+            body { background: white; color: black; padding: 0; margin: 0; }
+            .header, .bottom-nav, .view:not(#view-invoice-detail), .modal-overlay, #toast-container, .no-print { display: none !important; }
+            #view-invoice-detail { display: block !important; padding: 0; }
+            .card { border: none; box-shadow: none; padding: 0; margin: 0; }
+            .invoice-print-area { max-width: 100%; width: 100%; }
+            table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; }
+            th, td { border-bottom: 1px solid #ccc; padding: 0.5rem 0; text-align: left; }
+            th { border-bottom: 2px solid black; }
+            .text-right { text-align: right; }
+        }
+    </style>
+</head>
+<body>
+    <!-- ANNOUNCER FOR ACCESSIBILITY -->
+    <div aria-live="polite" aria-atomic="true" class="sr-only" id="a11y-announcer"></div>
+
+    <!-- HEADER -->
+    <header class="header">
+        <div class="header-title">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg>
+            <span id="app-header-name">Massage OS</span>
+        </div>
+    </header>
+
+    <!-- MAIN CONTAINER -->
+    <main class="container" id="main-content">
+        
+        <!-- DASHBOARD -->
+        <section id="view-dashboard" class="view active" aria-labelledby="title-dashboard">
+            <h1 id="title-dashboard" class="sr-only">Dashboard</h1>
+            
+            <div class="grid grid-2 mb-2">
+                <div class="stat-card">
+                    <h2 class="text-muted" style="font-size:0.9rem; margin:0;">Pendapatan Hari Ini</h2>
+                    <p class="stat-value text-primary" id="dash-income-today">Rp 0</p>
+                </div>
+                <div class="stat-card">
+                    <h2 class="text-muted" style="font-size:0.9rem; margin:0;">Pendapatan Bulan Ini</h2>
+                    <p class="stat-value text-primary" id="dash-income-month">Rp 0</p>
+                </div>
+            </div>
+            <div class="grid grid-2 mb-2">
+                <div class="stat-card" style="border-left-color: var(--warning);">
+                    <h2 class="text-muted" style="font-size:0.9rem; margin:0;">Piutang (Belum Lunas)</h2>
+                    <p class="stat-value" id="dash-receivable" style="color:var(--warning);">Rp 0</p>
+                </div>
+                <div class="stat-card" style="border-left-color: var(--danger);">
+                    <h2 class="text-muted" style="font-size:0.9rem; margin:0;">Pengeluaran Bulan Ini</h2>
+                    <p class="stat-value" id="dash-expense-month" style="color:var(--danger);">Rp 0</p>
+                </div>
+            </div>
+            
+            <div class="card mb-2">
+                <h2 style="font-size: 1.1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; margin-bottom: 1rem;">Aksi Cepat</h2>
+                <div class="grid grid-2">
+                    <button class="btn btn-primary" onclick="app.nav('pos')" aria-label="Buat Transaksi Baru">Trx Baru</button>
+                    <button class="btn btn-secondary" onclick="ui.openModal('modal-customer')" aria-label="Tambah Pelanggan Baru">+ Pelanggan</button>
+                    <button class="btn btn-secondary" onclick="app.nav('expenses')" aria-label="Catat Pengeluaran Baru">Catat Keluar</button>
+                    <button class="btn btn-secondary" onclick="app.nav('reports')" aria-label="Lihat Laporan">Laporan</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="flex-between mb-1">
+                    <h2 style="font-size: 1.1rem;">Transaksi Terbaru</h2>
+                    <button class="btn btn-sm btn-secondary" onclick="app.nav('invoices')" aria-label="Lihat semua transaksi">Semua</button>
+                </div>
+                <div id="dash-recent-list"></div>
+            </div>
+        </section>
+
+        <!-- POS / KASIR -->
+        <section id="view-pos" class="view" aria-labelledby="title-pos">
+            <h1 id="title-pos" class="mb-2">Kasir / Transaksi</h1>
+            <div class="card">
+                <div class="form-group">
+                    <label for="pos-customer" class="form-label">Pelanggan</label>
+                    <div style="display:flex; gap:0.5rem;">
+                        <select id="pos-customer" class="form-control" aria-label="Pilih Pelanggan"></select>
+                        <button class="btn btn-secondary" onclick="ui.openModal('modal-customer')" aria-label="Tambah Pelanggan">+</button>
+                    </div>
+                </div>
+                
+                <div class="form-group mt-2">
+                    <label for="pos-service" class="form-label">Pilih Layanan</label>
+                    <div style="display:flex; gap:0.5rem;">
+                        <select id="pos-service" class="form-control" aria-label="Pilih Layanan"></select>
+                        <button class="btn btn-primary" onclick="pos.addItem()" aria-label="Tambah ke keranjang">Tambah</button>
+                    </div>
+                </div>
+
+                <div id="pos-cart" class="mt-2 mb-2" aria-live="polite">
+                    <!-- Cart items here -->
+                </div>
+
+                <div class="grid grid-2">
+                    <div class="form-group">
+                        <label for="pos-discount" class="form-label">Diskon (Rp)</label>
+                        <input type="number" id="pos-discount" class="form-control" min="0" value="0" oninput="pos.calc()">
+                    </div>
+                    <div class="form-group">
+                        <label for="pos-transport" class="form-label">Transportasi (Rp)</label>
+                        <input type="number" id="pos-transport" class="form-control" min="0" value="0" oninput="pos.calc()">
+                    </div>
+                </div>
+
+                <div style="background: var(--bg-surface-hover); padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+                    <div class="flex-between mb-1"><span class="text-muted">Subtotal</span> <span id="pos-subtotal" class="font-bold">Rp 0</span></div>
+                    <div class="flex-between mb-1"><span class="text-muted">Diskon</span> <span id="pos-disc-val" class="text-danger">- Rp 0</span></div>
+                    <div class="flex-between mb-1"><span class="text-muted">Transport</span> <span id="pos-trans-val">+ Rp 0</span></div>
+                    <hr style="border-top: 1px dashed var(--border); margin: 0.5rem 0;">
+                    <div class="flex-between"><span class="font-bold" style="font-size:1.2rem;">TOTAL</span> <span id="pos-total" class="font-bold text-primary" style="font-size:1.2rem;" aria-live="polite">Rp 0</span></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="pos-pay-method" class="form-label">Metode Pembayaran</label>
+                    <select id="pos-pay-method" class="form-control"></select>
+                </div>
+                <div class="form-group">
+                    <label for="pos-status" class="form-label">Status Pembayaran</label>
+                    <select id="pos-status" class="form-control" onchange="pos.togglePayInput()">
+                        <option value="Lunas">Lunas</option>
+                        <option value="Belum Lunas">Belum Lunas (Piutang)</option>
+                    </select>
+                </div>
+                <div class="form-group" id="pos-pay-group">
+                    <label for="pos-payment" class="form-label">Jumlah Uang Diterima (Rp)</label>
+                    <input type="number" id="pos-payment" class="form-control" min="0" oninput="pos.calc()">
+                    <div class="mt-1 text-muted">Kembalian: <span id="pos-change" class="font-bold">Rp 0</span></div>
+                </div>
+                <div class="form-group">
+                    <label for="pos-notes" class="form-label">Catatan Invoice (Opsional)</label>
+                    <textarea id="pos-notes" class="form-control"></textarea>
+                </div>
+
+                <button class="btn btn-primary btn-block mt-2" onclick="pos.save()" aria-label="Simpan Transaksi dan Buat Invoice">Simpan & Buat Invoice</button>
+            </div>
+        </section>
+
+        <!-- CUSTOMERS -->
+        <section id="view-customers" class="view" aria-labelledby="title-customers">
+            <div class="flex-between mb-2">
+                <h1 id="title-customers">Pelanggan</h1>
+                <button class="btn btn-primary btn-sm" onclick="ui.openModal('modal-customer')" aria-label="Tambah Pelanggan">+ Tambah</button>
+            </div>
+            <div class="form-group">
+                <label for="search-customer" class="sr-only">Cari Pelanggan</label>
+                <input type="text" id="search-customer" class="form-control" placeholder="Cari nama atau WA..." oninput="customers.render()">
+            </div>
+            <div id="list-customers" aria-live="polite"></div>
+        </section>
+
+        <!-- SERVICES -->
+        <section id="view-services" class="view" aria-labelledby="title-services">
+            <div class="flex-between mb-2">
+                <h1 id="title-services">Layanan</h1>
+                <button class="btn btn-primary btn-sm" onclick="ui.openModal('modal-service')" aria-label="Tambah Layanan">+ Tambah</button>
+            </div>
+            <div id="list-services" aria-live="polite"></div>
+        </section>
+
+        <!-- EXPENSES -->
+        <section id="view-expenses" class="view" aria-labelledby="title-expenses">
+            <div class="flex-between mb-2">
+                <h1 id="title-expenses">Pengeluaran</h1>
+                <button class="btn btn-primary btn-sm" onclick="ui.openModal('modal-expense')" aria-label="Catat Pengeluaran">+ Catat</button>
+            </div>
+            <div class="grid grid-2 mb-2">
+                <div class="form-group">
+                    <label for="filter-exp-month" class="sr-only">Filter Bulan</label>
+                    <input type="month" id="filter-exp-month" class="form-control" onchange="expenses.render()">
+                </div>
+            </div>
+            <div id="list-expenses" aria-live="polite"></div>
+        </section>
+
+        <!-- INVOICES HISTORY -->
+        <section id="view-invoices" class="view" aria-labelledby="title-invoices">
+            <h1 id="title-invoices" class="mb-2">Riwayat Transaksi</h1>
+            <div class="grid grid-2 mb-2">
+                <input type="text" id="search-invoice" class="form-control" placeholder="Cari No. Invoice / Nama..." aria-label="Cari Invoice" oninput="invoices.render()">
+                <select id="filter-invoice-status" class="form-control" aria-label="Filter Status" onchange="invoices.render()">
+                    <option value="">Semua Status</option>
+                    <option value="Lunas">Lunas</option>
+                    <option value="Belum Lunas">Belum Lunas</option>
+                </select>
+            </div>
+            <div id="list-invoices" aria-live="polite"></div>
+        </section>
+
+        <!-- INVOICE DETAIL (PRINTABLE) -->
+        <section id="view-invoice-detail" class="view" aria-labelledby="title-inv-detail">
+            <h1 id="title-inv-detail" class="sr-only">Detail Invoice</h1>
+            <div class="flex-between mb-2 no-print">
+                <button class="btn btn-secondary" onclick="app.nav('invoices')" aria-label="Kembali ke Riwayat">&larr; Kembali</button>
+                <div style="display:flex; gap:0.5rem;">
+                    <button class="btn btn-primary" onclick="window.print()" aria-label="Cetak atau Simpan PDF">Cetak / PDF</button>
+                    <button class="btn btn-success" id="btn-share-wa" aria-label="Bagikan ke WhatsApp">WhatsApp</button>
+                </div>
+            </div>
+
+            <div class="card invoice-print-area" id="print-container" style="background: white; color: black; max-width: 800px; margin: 0 auto; padding: 2rem;">
+                <!-- Invoice Content Injected Here -->
+            </div>
+        </section>
+
+        <!-- REPORTS -->
+        <section id="view-reports" class="view" aria-labelledby="title-reports">
+            <h1 id="title-reports" class="mb-2">Laporan Keuangan</h1>
+            <div class="card">
+                <div class="form-group">
+                    <label for="report-period" class="form-label">Pilih Periode</label>
+                    <select id="report-period" class="form-control" onchange="reports.generate()">
+                        <option value="today">Hari Ini</option>
+                        <option value="this_week">Minggu Ini</option>
+                        <option value="this_month" selected>Bulan Ini</option>
+                        <option value="this_year">Tahun Ini</option>
+                        <option value="all_time">Semua Waktu</option>
+                    </select>
+                </div>
+                <div id="report-content" class="mt-4" aria-live="polite"></div>
+            </div>
+        </section>
+
+        <!-- SETTINGS -->
+        <section id="view-settings" class="view" aria-labelledby="title-settings">
+            <h1 id="title-settings" class="mb-2">Pengaturan</h1>
+            
+            <div class="card">
+                <h2>Profil Usaha</h2>
+                <form id="form-profile" onsubmit="event.preventDefault(); profile.save();">
+                    <div class="text-center mb-2">
+                        <img id="prof-logo-preview" src="" alt="Logo Usaha" style="max-width:120px; max-height:120px; display:none; margin: 0 auto 1rem; border:1px solid #ccc; border-radius:8px;">
+                        <label for="prof-logo" class="btn btn-secondary btn-sm" tabindex="0" role="button" aria-label="Pilih gambar logo">Pilih Logo</label>
+                        <input type="file" id="prof-logo" class="sr-only" accept="image/*" onchange="profile.handleLogo(event)">
+                        <button type="button" class="btn btn-danger btn-sm" id="btn-del-logo" style="display:none;" onclick="profile.delLogo()" aria-label="Hapus logo">Hapus</button>
+                    </div>
+                    <div class="form-group"><label for="prof-name" class="form-label">Nama Usaha *</label><input type="text" id="prof-name" class="form-control" required></div>
+                    <div class="grid grid-2">
+                        <div class="form-group"><label for="prof-wa" class="form-label">No WhatsApp *</label><input type="text" id="prof-wa" class="form-control" required></div>
+                        <div class="form-group"><label for="prof-owner" class="form-label">Nama Pemilik</label><input type="text" id="prof-owner" class="form-control"></div>
+                    </div>
+                    <div class="form-group"><label for="prof-address" class="form-label">Alamat Lengkap</label><textarea id="prof-address" class="form-control"></textarea></div>
+                    <button type="submit" class="btn btn-primary btn-block">Simpan Profil</button>
+                </form>
+            </div>
+
+            <div class="card">
+                <h2>Pengaturan Invoice</h2>
+                <div class="form-group"><label for="set-inv-prefix" class="form-label">Awalan Nomor Invoice</label><input type="text" id="set-inv-prefix" class="form-control" value="INV-"></div>
+                <div class="form-group"><label for="set-inv-thanks" class="form-label">Ucapan Terima Kasih</label><textarea id="set-inv-thanks" class="form-control"></textarea></div>
+                <button class="btn btn-primary btn-block" onclick="settings.saveInv()">Simpan Pengaturan Invoice</button>
+            </div>
+
+            <div class="card">
+                <div class="flex-between mb-1"><h2>Data Referensi</h2></div>
+                <div class="grid grid-2">
+                    <button class="btn btn-secondary" onclick="ui.openModal('modal-manage', 'srvCats')">Kategori Layanan</button>
+                    <button class="btn btn-secondary" onclick="ui.openModal('modal-manage', 'expCats')">Kategori Pengeluaran</button>
+                    <button class="btn btn-secondary" onclick="ui.openModal('modal-manage', 'payMethods')">Metode Pembayaran</button>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h2>Tampilan</h2>
+                <div class="form-group">
+                    <label for="set-theme" class="form-label">Tema Aplikasi</label>
+                    <select id="set-theme" class="form-control" onchange="app.setTheme(this.value)">
+                        <option value="light">Terang</option>
+                        <option value="dark">Gelap</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>Data & Backup</h2>
+                <p class="text-muted mb-2 text-sm">Data tersimpan aman di perangkat ini (localStorage).</p>
+                <div class="grid grid-2">
+                    <button class="btn btn-primary" onclick="backup.export()">Backup Data (JSON)</button>
+                    <label for="file-restore" class="btn btn-secondary" style="text-align:center;" role="button" tabindex="0">Restore Data</label>
+                    <input type="file" id="file-restore" class="sr-only" accept=".json" onchange="backup.import(event)">
+                </div>
+                <hr class="mt-2 mb-2" style="border-top:1px solid var(--border);">
+                <button class="btn btn-danger btn-block" onclick="backup.reset()">RESET SEMUA DATA</button>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- BOTTOM NAVIGATION -->
+    <nav class="bottom-nav">
+        <button class="nav-item active" onclick="app.nav('dashboard')" aria-label="Menu Dashboard"><svg viewBox="0 0 24 24"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg><span>Dashboard</span></button>
+        <button class="nav-item" onclick="app.nav('pos')" aria-label="Menu Kasir"><svg viewBox="0 0 24 24"><path d="M19 8V6H5v2h14zm0 12H5v-8h14v8zM5 4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2H5z"/></svg><span>Kasir</span></button>
+        <button class="nav-item" onclick="app.nav('customers')" aria-label="Menu Pelanggan"><svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg><span>Pelanggan</span></button>
+        <button class="nav-item" onclick="app.nav('services')" aria-label="Menu Layanan"><svg viewBox="0 0 24 24"><path d="M20 6h-4V4c0-1.11-.89-2-2-2h-4c-1.11 0-2 .89-2 2v2H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-6 0h-4V4h4v2z"/></svg><span>Layanan</span></button>
+        <button class="nav-item" onclick="app.nav('settings')" aria-label="Menu Pengaturan"><svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.06-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.56-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.04.3-.06.62-.06.94s.02.64.06.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .43-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.49-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg><span>Setelan</span></button>
+    </nav>
+
+    <!-- TOAST CONTAINER -->
+    <div id="toast-container" aria-live="polite"></div>
+
+    <!-- MODALS -->
+    <!-- Modal Customer -->
+    <div class="modal-overlay" id="modal-customer" role="dialog" aria-modal="true" aria-labelledby="mc-title">
+        <div class="modal">
+            <div class="modal-header"><h2 id="mc-title" style="margin:0;font-size:1.2rem;">Form Pelanggan</h2><button class="close-btn" onclick="ui.closeModal('modal-customer')" aria-label="Tutup">&times;</button></div>
+            <div class="modal-body">
+                <form id="form-cust" onsubmit="event.preventDefault(); customers.save();">
+                    <input type="hidden" id="mc-id">
+                    <div class="form-group"><label for="mc-name" class="form-label">Nama *</label><input type="text" id="mc-name" class="form-control" required></div>
+                    <div class="form-group"><label for="mc-wa" class="form-label">No WhatsApp *</label><input type="tel" id="mc-wa" class="form-control" placeholder="Contoh: 0812..." required></div>
+                    <div class="form-group"><label for="mc-address" class="form-label">Alamat</label><textarea id="mc-address" class="form-control" rows="2"></textarea></div>
+                    <div class="form-group"><label for="mc-notes" class="form-label">Catatan</label><textarea id="mc-notes" class="form-control" rows="2"></textarea></div>
+                </form>
+            </div>
+            <div class="modal-footer"><button class="btn btn-secondary" onclick="ui.closeModal('modal-customer')">Batal</button><button class="btn btn-primary" onclick="document.getElementById('form-cust').requestSubmit()">Simpan</button></div>
+        </div>
+    </div>
+
+    <!-- Modal Service -->
+    <div class="modal-overlay" id="modal-service" role="dialog" aria-modal="true" aria-labelledby="ms-title">
+        <div class="modal">
+            <div class="modal-header"><h2 id="ms-title" style="margin:0;font-size:1.2rem;">Form Layanan</h2><button class="close-btn" onclick="ui.closeModal('modal-service')" aria-label="Tutup">&times;</button></div>
+            <div class="modal-body">
+                <form id="form-srv" onsubmit="event.preventDefault(); services.save();">
+                    <input type="hidden" id="ms-id">
+                    <div class="form-group"><label for="ms-name" class="form-label">Nama Layanan *</label><input type="text" id="ms-name" class="form-control" required></div>
+                    <div class="grid grid-2">
+                        <div class="form-group"><label for="ms-cat" class="form-label">Kategori</label><select id="ms-cat" class="form-control"></select></div>
+                        <div class="form-group"><label for="ms-dur" class="form-label">Durasi (Menit) *</label><input type="number" id="ms-dur" class="form-control" min="1" required></div>
+                    </div>
+                    <div class="form-group"><label for="ms-price" class="form-label">Harga (Rp) *</label><input type="number" id="ms-price" class="form-control" min="0" required></div>
+                    <div class="form-group"><label for="ms-desc" class="form-label">Deskripsi</label><textarea id="ms-desc" class="form-control" rows="2"></textarea></div>
+                    <div class="form-group"><label class="form-label" style="display:flex; align-items:center; gap:8px;"><input type="checkbox" id="ms-active" checked style="width:20px;height:20px;"> Layanan Aktif</label></div>
+                </form>
+            </div>
+            <div class="modal-footer"><button class="btn btn-secondary" onclick="ui.closeModal('modal-service')">Batal</button><button class="btn btn-primary" onclick="document.getElementById('form-srv').requestSubmit()">Simpan</button></div>
+        </div>
+    </div>
+
+    <!-- Modal Expense -->
+    <div class="modal-overlay" id="modal-expense" role="dialog" aria-modal="true" aria-labelledby="me-title">
+        <div class="modal">
+            <div class="modal-header"><h2 id="me-title" style="margin:0;font-size:1.2rem;">Form Pengeluaran</h2><button class="close-btn" onclick="ui.closeModal('modal-expense')" aria-label="Tutup">&times;</button></div>
+            <div class="modal-body">
+                <form id="form-exp" onsubmit="event.preventDefault(); expenses.save();">
+                    <input type="hidden" id="me-id">
+                    <div class="grid grid-2">
+                        <div class="form-group"><label for="me-date" class="form-label">Tanggal *</label><input type="date" id="me-date" class="form-control" required></div>
+                        <div class="form-group"><label for="me-cat" class="form-label">Kategori *</label><select id="me-cat" class="form-control" required></select></div>
+                    </div>
+                    <div class="form-group"><label for="me-desc" class="form-label">Keterangan *</label><input type="text" id="me-desc" class="form-control" required></div>
+                    <div class="form-group"><label for="me-amount" class="form-label">Nominal (Rp) *</label><input type="number" id="me-amount" class="form-control" min="0" required></div>
+                    
+                    <!-- Fitur Tambahan: Scan Nota -->
+                    <div class="form-group" style="background:var(--bg-surface-hover); padding:1rem; border-radius:8px; border:1px dashed var(--border);">
+                        <label for="me-scan" class="form-label">Scan Nota (Opsional)</label>
+                        <p class="text-muted" style="font-size:0.8rem; margin-bottom:0.5rem;">Ambil foto nota untuk referensi.</p>
+                        <input type="file" id="me-scan" accept="image/*" capture="environment" class="form-control" style="padding:0.5rem;" onchange="ui.toast('Foto dilampirkan. Ketik manual nominal jika perlu.')">
+                    </div>
+
+                    <div class="form-group"><label for="me-notes" class="form-label">Catatan Tambahan</label><textarea id="me-notes" class="form-control" rows="2"></textarea></div>
+                </form>
+            </div>
+            <div class="modal-footer"><button class="btn btn-secondary" onclick="ui.closeModal('modal-expense')">Batal</button><button class="btn btn-primary" onclick="document.getElementById('form-exp').requestSubmit()">Simpan</button></div>
+        </div>
+    </div>
+
+    <!-- Modal Reference Data (Categories/Pay Methods) -->
+    <div class="modal-overlay" id="modal-manage" role="dialog" aria-modal="true" aria-labelledby="mm-title">
+        <div class="modal">
+            <div class="modal-header"><h2 id="mm-title" style="margin:0;font-size:1.2rem;">Kelola Data</h2><button class="close-btn" onclick="ui.closeModal('modal-manage')" aria-label="Tutup">&times;</button></div>
+            <div class="modal-body">
+                <form onsubmit="event.preventDefault(); settings.addRef();" style="display:flex; gap:0.5rem; margin-bottom:1rem;">
+                    <input type="hidden" id="mm-key">
+                    <input type="text" id="mm-input" class="form-control" placeholder="Tambah baru..." required aria-label="Nama item baru">
+                    <button type="submit" class="btn btn-primary">Tambah</button>
+                </form>
+                <div id="mm-list"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Confirm -->
+    <div class="modal-overlay" id="modal-confirm" role="dialog" aria-modal="true" aria-labelledby="mcf-title" aria-describedby="mcf-msg">
+        <div class="modal" style="max-width:400px;">
+            <div class="modal-header"><h2 id="mcf-title" style="margin:0;font-size:1.2rem;">Konfirmasi</h2><button class="close-btn" onclick="ui.closeConfirm()" aria-label="Batal">&times;</button></div>
+            <div class="modal-body"><p id="mcf-msg">Apakah Anda yakin?</p></div>
+            <div class="modal-footer"><button class="btn btn-secondary" onclick="ui.closeConfirm()">Batal</button><button class="btn btn-danger" id="mcf-btn">Ya, Lanjutkan</button></div>
+        </div>
+    </div>
+
+    <!-- SCRIPT -->
+    <script>
+        // --- UTILITIES ---
+        const util = {
+            id: () => Date.now().toString(36) + Math.random().toString(36).substr(2, 5),
+            rp: (num) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(num || 0),
+            date: (iso, time=false) => {
+                if(!iso) return '-';
+                const d = new Date(iso);
+                const opts = { day:'2-digit', month:'long', year:'numeric' };
+                if(time) { opts.hour = '2-digit'; opts.minute = '2-digit'; }
+                return d.toLocaleDateString('id-ID', opts);
+            },
+            getEl: (id) => document.getElementById(id),
+            val: (id) => document.getElementById(id).value,
+            setVal: (id, v) => document.getElementById(id).value = v,
+            todayStr: () => new Date().toISOString().split('T')[0]
+        };
+
+        // --- DATA STORE ---
+        const db = {
+            key: 'massageOS_data',
+            data: {},
+            defaults: {
+                profile: { name: "Massage OS", logo: "", owner: "", wa: "", email: "", address: "", desc: "", slogan: "" },
+                settings: { 
+                    prefix: "INV-", 
+                    thanks: "Terima kasih telah mempercayakan perawatan Anda kepada kami. Semoga selalu diberikan kesehatan, kenyamanan, dan kebaikan. Kami berharap dapat melayani Anda kembali.",
+                    theme: "light",
+                    srvCats: ["Massage Tradisional", "Refleksi", "Spa", "Panggilan"],
+                    expCats: ["Transportasi", "Perlengkapan", "Konsumsi", "Sewa", "Lainnya"],
+                    payMethods: ["Tunai", "Transfer BCA", "QRIS", "Gopay/OVO"]
+                },
+                services: [], customers: [], transactions: [], expenses: []
+            },
+            init: () => {
+                const stored = localStorage.getItem(db.key);
+                if (stored) {
+                    try { db.data = JSON.parse(stored); } catch(e) { db.data = db.defaults; }
+                } else {
+                    db.data = JSON.parse(JSON.stringify(db.defaults));
+                }
+                // Ensure all keys exist (migration safeguard)
+                for(let k in db.defaults) if(!db.data[k]) db.data[k] = db.defaults[k];
+                db.save();
+                app.setTheme(db.data.settings.theme);
+            },
+            save: () => localStorage.setItem(db.key, JSON.stringify(db.data))
+        };
+
+        // --- UI & A11Y ---
+        const ui = {
+            announce: (msg) => { util.getEl('a11y-announcer').textContent = msg; },
+            toast: (msg, isError=false) => {
+                const c = util.getEl('toast-container');
+                const t = document.createElement('div');
+                t.className = 'toast';
+                t.style.background = isError ? 'var(--danger)' : 'var(--text-main)';
+                t.textContent = msg;
+                c.appendChild(t);
+                ui.announce(msg);
+                setTimeout(() => t.remove(), 3000);
+            },
+            openModal: (id, payload=null) => {
+                util.getEl(id).classList.add('active');
+                if(id==='modal-customer') customers.prep(payload);
+                if(id==='modal-service') services.prep(payload);
+                if(id==='modal-expense') expenses.prep(payload);
+                if(id==='modal-manage') settings.prepRef(payload);
+            },
+            closeModal: (id) => {
+                util.getEl(id).classList.remove('active');
+                const form = util.getEl(id).querySelector('form');
+                if(form) form.reset();
+            },
+            confirmObj: null,
+            confirm: (msg, callback) => {
+                util.getEl('mcf-msg').textContent = msg;
+                util.getEl('mcf-btn').onclick = () => { callback(); ui.closeConfirm(); };
+                util.getEl('modal-confirm').classList.add('active');
+                ui.announce("Dialog konfirmasi: " + msg);
+            },
+            closeConfirm: () => util.getEl('modal-confirm').classList.remove('active')
+        };
+
+        // --- APP & NAVIGATION ---
+        const app = {
+            current: 'dashboard',
+            init: () => {
+                db.init();
+                app.nav('dashboard');
+                profile.load();
+                settings.load();
+            },
+            nav: (view) => {
+                document.querySelectorAll('.view').forEach(e => e.classList.remove('active'));
+                document.querySelectorAll('.nav-item').forEach(e => e.classList.remove('active'));
+                
+                util.getEl(`view-${view}`).classList.add('active');
+                const navBtn = document.querySelector(`.nav-item[onclick*="${view}"]`);
+                if(navBtn) navBtn.classList.add('active');
+                
+                app.current = view;
+                window.scrollTo(0,0);
+
+                if(view==='dashboard') dashboard.render();
+                if(view==='customers') customers.render();
+                if(view==='services') services.render();
+                if(view==='expenses') expenses.render();
+                if(view==='pos') pos.init();
+                if(view==='invoices') invoices.render();
+                if(view==='reports') reports.generate();
+            },
+            setTheme: (t) => {
+                document.documentElement.setAttribute('data-theme', t);
+                if(db.data.settings) { db.data.settings.theme = t; db.save(); }
+                const sel = util.getEl('set-theme');
+                if(sel) sel.value = t;
+            }
+        };
+
+        // --- DASHBOARD ---
+        const dashboard = {
+            render: () => {
+                const today = util.todayStr();
+                const month = today.substring(0,7);
+                const txs = db.data.transactions;
+                const exps = db.data.expenses;
+
+                const txToday = txs.filter(t => t.date.startsWith(today));
+                const txMonth = txs.filter(t => t.date.startsWith(month));
+                const expMonth = exps.filter(e => e.date.startsWith(month));
+
+                const incToday = txToday.reduce((s,t) => s+t.total, 0);
+                const incMonth = txMonth.reduce((s,t) => s+t.total, 0);
+                const outMonth = expMonth.reduce((s,e) => s+e.amount, 0);
+                const piutang = txs.filter(t => t.status==='Belum Lunas').reduce((s,t) => s+(t.total - t.paid), 0);
+
+                util.getEl('dash-income-today').textContent = util.rp(incToday);
+                util.getEl('dash-income-month').textContent = util.rp(incMonth);
+                util.getEl('dash-expense-month').textContent = util.rp(outMonth);
+                util.getEl('dash-receivable').textContent = util.rp(piutang);
+
+                // Recent
+                const recent = txs.slice().sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,5);
+                const cList = util.getEl('dash-recent-list');
+                if(!recent.length) {
+                    cList.innerHTML = '<div class="empty-state">Belum ada transaksi.</div>';
+                } else {
+                    cList.innerHTML = recent.map(t => {
+                        const c = db.data.customers.find(x=>x.id===t.customerId) || {name:'Unknown'};
+                        return `<div class="list-item" onclick="invoices.view('${t.id}')" style="cursor:pointer; flex-direction:row; justify-content:space-between; align-items:center;">
+                            <div><div class="font-bold">${c.name}</div><div class="text-muted" style="font-size:0.8rem;">${t.inv} • ${util.date(t.date)}</div></div>
+                            <div class="text-right"><div class="font-bold text-primary">${util.rp(t.total)}</div><span class="badge ${t.status==='Lunas'?'badge-success':'badge-danger'}">${t.status}</span></div>
+                        </div>`;
+                    }).join('');
+                }
+            }
+        };
+
+        // --- PROFILE ---
+        const profile = {
+            load: () => {
+                const p = db.data.profile;
+                util.getEl('app-header-name').textContent = p.name || 'Massage OS';
+                util.setVal('prof-name', p.name); util.setVal('prof-wa', p.wa);
+                util.setVal('prof-owner', p.owner); util.setVal('prof-email', p.email);
+                util.setVal('prof-address', p.address);
+                if(p.logo) {
+                    util.getEl('prof-logo-preview').src = p.logo;
+                    util.getEl('prof-logo-preview').style.display = 'block';
+                    util.getEl('btn-del-logo').style.display = 'inline-block';
+                }
+            },
+            handleLogo: (e) => {
+                const f = e.target.files[0];
+                if(!f) return;
+                const r = new FileReader();
+                r.onload = (ev) => {
+                    db.data.profile.logo = ev.target.result;
+                    db.save(); profile.load(); ui.toast('Logo diperbarui');
+                };
+                r.readAsDataURL(f);
+            },
+            delLogo: () => {
+                db.data.profile.logo = ""; db.save(); 
+                util.getEl('prof-logo-preview').style.display = 'none';
+                util.getEl('btn-del-logo').style.display = 'none';
+                util.getEl('prof-logo').value = "";
+                ui.toast('Logo dihapus');
+            },
+            save: () => {
+                db.data.profile.name = util.val('prof-name');
+                db.data.profile.wa = util.val('prof-wa');
+                db.data.profile.owner = util.val('prof-owner');
+                db.data.profile.email = util.val('prof-email');
+                db.data.profile.address = util.val('prof-address');
+                db.save(); profile.load(); ui.toast('Profil tersimpan');
+            }
+        };
+
+        // --- CUSTOMERS ---
+        const customers = {
+            prep: (id) => {
+                const c = db.data.customers.find(x=>x.id===id);
+                util.setVal('mc-id', id||''); util.setVal('mc-name', c?c.name:'');
+                util.setVal('mc-wa', c?c.wa:''); util.setVal('mc-address', c?c.address:'');
+                util.setVal('mc-notes', c?c.notes:'');
+            },
+            save: () => {
+                const id = util.val('mc-id');
+                const isNew = !id;
+                const obj = { id: id||util.id(), name: util.val('mc-name'), wa: util.val('mc-wa'), address: util.val('mc-address'), notes: util.val('mc-notes'), firstVisit: isNew ? util.todayStr() : undefined };
+                
+                if(isNew) db.data.customers.unshift(obj);
+                else {
+                    const idx = db.data.customers.findIndex(x=>x.id===id);
+                    if(idx>-1) { obj.firstVisit = db.data.customers[idx].firstVisit; db.data.customers[idx] = obj; }
+                }
+                db.save(); ui.closeModal('modal-customer'); ui.toast('Pelanggan disimpan');
+                if(app.current==='customers') customers.render();
+                if(app.current==='pos') pos.initCusts(obj.id);
+            },
+            render: () => {
+                const q = util.val('search-customer').toLowerCase();
+                let list = db.data.customers;
+                if(q) list = list.filter(c => c.name.toLowerCase().includes(q) || c.wa.includes(q));
+                const cList = util.getEl('list-customers');
+                
+                if(!list.length) { cList.innerHTML = '<div class="empty-state">Belum ada pelanggan.</div>'; return; }
+                
+                cList.innerHTML = list.map(c => {
+                    const txs = db.data.transactions.filter(t=>t.customerId===c.id);
+                    const total = txs.reduce((s,t)=>s+t.total,0);
+                    return `
+                    <div class="list-item">
+                        <div class="list-header">
+                            <div><div class="list-title">${c.name}</div><div class="text-muted" style="font-size:0.85rem;">WA: ${c.wa}</div></div>
+                            <span class="badge badge-success">${txs.length} Trx</span>
+                        </div>
+                        <div class="text-muted" style="font-size:0.85rem;">Total Belanja: <span class="font-bold text-main">${util.rp(total)}</span></div>
+                        <div class="list-actions">
+                            <button class="btn btn-sm btn-secondary" onclick="ui.openModal('modal-customer','${c.id}')">Edit</button>
+                            <a href="https://wa.me/${c.wa.replace(/^0/,'62')}" target="_blank" class="btn btn-sm btn-success" style="background:#25D366;color:#fff;">WA</a>
+                            <button class="btn btn-sm btn-danger" onclick="customers.del('${c.id}')">Hapus</button>
+                        </div>
+                    </div>`;
+                }).join('');
+            },
+            del: (id) => {
+                ui.confirm('Hapus pelanggan ini?', () => {
+                    db.data.customers = db.data.customers.filter(c=>c.id!==id);
+                    db.save(); ui.toast('Dihapus'); customers.render();
+                });
+            }
+        };
+
+        // --- SERVICES ---
+        const services = {
+            prep: (id) => {
+                const s = db.data.services.find(x=>x.id===id);
+                util.setVal('ms-id', id||''); util.setVal('ms-name', s?s.name:'');
+                util.setVal('ms-dur', s?s.dur:60); util.setVal('ms-price', s?s.price:'');
+                util.setVal('ms-desc', s?s.desc:''); util.getEl('ms-active').checked = s?s.active:true;
+                
+                const catEl = util.getEl('ms-cat'); catEl.innerHTML = '';
+                db.data.settings.srvCats.forEach(c => catEl.innerHTML += `<option value="${c}">${c}</option>`);
+                if(s) util.setVal('ms-cat', s.cat);
+            },
+            save: () => {
+                const id = util.val('ms-id');
+                const obj = { id: id||util.id(), name: util.val('ms-name'), cat: util.val('ms-cat'), dur: parseInt(util.val('ms-dur'))||0, price: parseInt(util.val('ms-price'))||0, desc: util.val('ms-desc'), active: util.getEl('ms-active').checked };
+                if(!id) db.data.services.push(obj);
+                else { const idx = db.data.services.findIndex(x=>x.id===id); if(idx>-1) db.data.services[idx] = obj; }
+                db.save(); ui.closeModal('modal-service'); ui.toast('Layanan disimpan');
+                if(app.current==='services') services.render();
+            },
+            render: () => {
+                const list = db.data.services;
+                const cList = util.getEl('list-services');
+                if(!list.length) { cList.innerHTML = '<div class="empty-state">Belum ada layanan.</div>'; return; }
+                
+                cList.innerHTML = list.map(s => `
+                <div class="list-item" style="${!s.active?'opacity:0.6':''}">
+                    <div class="list-header">
+                        <div>
+                            <div class="list-title">${s.name} ${!s.active?'<span class="badge badge-danger">Nonaktif</span>':''}</div>
+                            <div class="text-muted" style="font-size:0.85rem;">${s.cat} • ${s.dur} Menit</div>
+                        </div>
+                        <div class="font-bold text-primary">${util.rp(s.price)}</div>
+                    </div>
+                    <div class="list-actions">
+                        <button class="btn btn-sm btn-secondary" onclick="ui.openModal('modal-service','${s.id}')">Edit</button>
+                        <button class="btn btn-sm btn-danger" onclick="services.del('${s.id}')">Hapus</button>
+                    </div>
+                </div>`).join('');
+            },
+            del: (id) => {
+                ui.confirm('Hapus layanan?', () => { db.data.services = db.data.services.filter(x=>x.id!==id); db.save(); ui.toast('Dihapus'); services.render(); });
+            }
+        };
+
+        // --- EXPENSES ---
+        const expenses = {
+            prep: (id) => {
+                const e = db.data.expenses.find(x=>x.id===id);
+                util.setVal('me-id', id||''); util.setVal('me-date', e?e.date:util.todayStr());
+                util.setVal('me-desc', e?e.desc:''); util.setVal('me-amount', e?e.amount:'');
+                util.setVal('me-notes', e?e.notes:'');
+                
+                const catEl = util.getEl('me-cat'); catEl.innerHTML = '';
+                db.data.settings.expCats.forEach(c => catEl.innerHTML += `<option value="${c}">${c}</option>`);
+                if(e) util.setVal('me-cat', e.cat);
+            },
+            save: () => {
+                const id = util.val('me-id');
+                const obj = { id: id||util.id(), date: util.val('me-date'), cat: util.val('me-cat'), desc: util.val('me-desc'), amount: parseInt(util.val('me-amount'))||0, notes: util.val('me-notes') };
+                if(!id) db.data.expenses.push(obj);
+                else { const idx = db.data.expenses.findIndex(x=>x.id===id); if(idx>-1) db.data.expenses[idx] = obj; }
+                db.data.expenses.sort((a,b)=>new Date(b.date)-new Date(a.date));
+                db.save(); ui.closeModal('modal-expense'); ui.toast('Pengeluaran disimpan');
+                if(app.current==='expenses') expenses.render();
+            },
+            render: () => {
+                const m = util.val('filter-exp-month');
+                let list = db.data.expenses;
+                if(m) list = list.filter(e => e.date.startsWith(m));
+                const cList = util.getEl('list-expenses');
+                if(!list.length) { cList.innerHTML = '<div class="empty-state">Belum ada pengeluaran.</div>'; return; }
+                
+                cList.innerHTML = `<div style="background:var(--danger);color:white;padding:1rem;border-radius:8px;margin-bottom:1rem;font-weight:bold;">Total: ${util.rp(list.reduce((s,e)=>s+e.amount,0))}</div>` + 
+                list.map(e => `
+                <div class="list-item">
+                    <div class="list-header">
+                        <div><div class="font-bold">${e.desc}</div><div class="text-muted" style="font-size:0.85rem;">${util.date(e.date)} • ${e.cat}</div></div>
+                        <div class="font-bold" style="color:var(--danger)">${util.rp(e.amount)}</div>
+                    </div>
+                    <div class="list-actions"><button class="btn btn-sm btn-secondary" onclick="ui.openModal('modal-expense','${e.id}')">Edit</button><button class="btn btn-sm btn-danger" onclick="expenses.del('${e.id}')">Hapus</button></div>
+                </div>`).join('');
+            },
+            del: (id) => { ui.confirm('Hapus pengeluaran?', () => { db.data.expenses = db.data.expenses.filter(x=>x.id!==id); db.save(); ui.toast('Dihapus'); expenses.render(); }); }
+        };
+
+        // --- POS / KASIR ---
+        const pos = {
+            cart: [],
+            init: () => {
+                pos.cart = [];
+                pos.initCusts();
+                const selSrv = util.getEl('pos-service'); selSrv.innerHTML = '<option value="">-- Pilih --</option>';
+                db.data.services.filter(s=>s.active).forEach(s => selSrv.innerHTML += `<option value="${s.id}">${s.name} - ${util.rp(s.price)}</option>`);
+                
+                const selPay = util.getEl('pos-pay-method'); selPay.innerHTML = '';
+                db.data.settings.payMethods.forEach(m => selPay.innerHTML += `<option value="${m}">${m}</option>`);
+                
+                util.setVal('pos-discount', 0); util.setVal('pos-transport', 0); util.setVal('pos-payment', ''); util.setVal('pos-notes', ''); util.setVal('pos-status', 'Lunas');
+                pos.togglePayInput();
+                pos.renderCart();
+            },
+            initCusts: (selId=null) => {
+                const sel = util.getEl('pos-customer'); sel.innerHTML = '<option value="">-- Pilih --</option>';
+                db.data.customers.forEach(c => sel.innerHTML += `<option value="${c.id}">${c.name} (${c.wa})</option>`);
+                if(selId) sel.value = selId;
+            },
+            addItem: () => {
+                const id = util.val('pos-service');
+                if(!id) return ui.toast('Pilih layanan', true);
+                const s = db.data.services.find(x=>x.id===id);
+                const ex = pos.cart.find(x=>x.id===id);
+                if(ex) ex.qty++; else pos.cart.push({id: s.id, name: s.name, dur: s.dur, price: s.price, qty: 1});
+                util.setVal('pos-service', '');
+                pos.renderCart();
+            },
+            updateQty: (idx, d) => {
+                pos.cart[idx].qty += d;
+                if(pos.cart[idx].qty <= 0) pos.cart.splice(idx,1);
+                pos.renderCart();
+            },
+            renderCart: () => {
+                const c = util.getEl('pos-cart');
+                if(!pos.cart.length) { c.innerHTML = '<div class="text-muted text-center" style="padding:1rem;border:1px dashed var(--border);border-radius:8px;">Keranjang kosong</div>'; }
+                else {
+                    c.innerHTML = pos.cart.map((item, i) => `
+                    <div style="display:grid; grid-template-columns: 2fr 1fr 1fr auto; gap:0.5rem; align-items:center; padding:0.5rem; border-bottom:1px solid var(--border);">
+                        <div><div class="font-bold" style="font-size:0.9rem;">${item.name}</div><div class="text-muted" style="font-size:0.8rem;">${util.rp(item.price)}</div></div>
+                        <div style="display:flex;align-items:center;gap:4px;"><button class="btn btn-sm btn-secondary" style="min-width:30px;padding:0;" onclick="pos.updateQty(${i},-1)">-</button><span style="min-width:20px;text-align:center;">${item.qty}</span><button class="btn btn-sm btn-secondary" style="min-width:30px;padding:0;" onclick="pos.updateQty(${i},1)">+</button></div>
+                        <div class="font-bold text-right" style="font-size:0.9rem;">${util.rp(item.price * item.qty)}</div>
+                    </div>`).join('');
+                }
+                pos.calc();
+            },
+            togglePayInput: () => {
+                const st = util.val('pos-status');
+                util.getEl('pos-pay-group').style.display = st==='Lunas' ? 'block' : 'none';
+                if(st==='Belum Lunas') util.setVal('pos-payment', 0);
+                pos.calc();
+            },
+            calc: () => {
+                const sub = pos.cart.reduce((s,i)=>s+(i.price*i.qty),0);
+                const disc = parseInt(util.val('pos-discount'))||0;
+                const trans = parseInt(util.val('pos-transport'))||0;
+                const tot = Math.max(0, sub - disc + trans);
+                const pay = parseInt(util.val('pos-payment'))||0;
+                const st = util.val('pos-status');
+                
+                util.getEl('pos-subtotal').textContent = util.rp(sub);
+                util.getEl('pos-disc-val').textContent = '- ' + util.rp(disc);
+                util.getEl('pos-trans-val').textContent = '+ ' + util.rp(trans);
+                util.getEl('pos-total').textContent = util.rp(tot);
+                
+                let change = 0;
+                if(st==='Lunas' && pay > tot) change = pay - tot;
+                util.getEl('pos-change').textContent = util.rp(change);
+                ui.announce(`Total ${util.rp(tot)}`);
+            },
+            genInvId: () => {
+                const pfx = db.data.settings.prefix || 'INV-';
+                const d = new Date(); const dStr = d.getFullYear().toString() + (d.getMonth()+1).toString().padStart(2,'0') + d.getDate().toString().padStart(2,'0');
+                const base = pfx + dStr + '-';
+                const todays = db.data.transactions.filter(t=>t.inv && t.inv.startsWith(base));
+                let max = 0;
+                todays.forEach(t => { const num = parseInt(t.inv.split('-').pop()); if(num>max) max = num; });
+                return base + (max+1).toString().padStart(4,'0');
+            },
+            save: () => {
+                const cid = util.val('pos-customer');
+                if(!cid) return ui.toast('Pilih pelanggan', true);
+                if(!pos.cart.length) return ui.toast('Keranjang kosong', true);
+                
+                const sub = pos.cart.reduce((s,i)=>s+(i.price*i.qty),0);
+                const disc = parseInt(util.val('pos-discount'))||0;
+                const trans = parseInt(util.val('pos-transport'))||0;
+                const tot = Math.max(0, sub - disc + trans);
+                const st = util.val('pos-status');
+                let pay = parseInt(util.val('pos-payment'))||0;
+
+                if(st==='Lunas' && pay < tot && pay > 0) return ui.toast('Uang kurang untuk Lunas', true);
+                if(st==='Lunas' && !util.val('pos-payment')) pay = tot; // auto exact
+
+                const tx = {
+                    id: util.id(), inv: pos.genInvId(), date: new Date().toISOString(), customerId: cid,
+                    items: JSON.parse(JSON.stringify(pos.cart)), // clone static prices
+                    sub, disc, trans, total: tot, paid: st==='Lunas'?pay:0, method: util.val('pos-pay-method'),
+                    status: st, notes: util.val('pos-notes')
+                };
+
+                db.data.transactions.unshift(tx); db.save();
+                ui.toast('Transaksi Berhasil!');
+                invoices.view(tx.id);
+            }
+        };
+
+        // --- INVOICES ---
+        const invoices = {
+            render: () => {
+                const q = util.val('search-invoice').toLowerCase();
+                const st = util.val('filter-invoice-status');
+                let list = db.data.transactions;
+                if(st) list = list.filter(t=>t.status===st);
+                if(q) list = list.filter(t => t.inv.toLowerCase().includes(q) || (db.data.customers.find(c=>c.id===t.customerId)||{name:''}).name.toLowerCase().includes(q));
+                
+                const cList = util.getEl('list-invoices');
+                if(!list.length) { cList.innerHTML = '<div class="empty-state">Tidak ada invoice.</div>'; return; }
+                
+                cList.innerHTML = list.map(t => {
+                    const c = db.data.customers.find(x=>x.id===t.customerId)||{name:'(Dihapus)'};
+                    return `<div class="list-item" onclick="invoices.view('${t.id}')" style="cursor:pointer;">
+                        <div class="list-header">
+                            <div><div class="font-bold">${t.inv}</div><div class="text-muted" style="font-size:0.85rem;">${util.date(t.date)}</div></div>
+                            <span class="badge ${t.status==='Lunas'?'badge-success':'badge-danger'}">${t.status}</span>
+                        </div>
+                        <div class="flex-between mt-1"><span>${c.name}</span><span class="font-bold text-primary">${util.rp(t.total)}</span></div>
+                    </div>`;
+                }).join('');
+            },
+            view: (id) => {
+                const t = db.data.transactions.find(x=>x.id===id);
+                if(!t) return;
+                const c = db.data.customers.find(x=>x.id===t.customerId)||{name:'-', wa:'-'};
+                const p = db.data.profile;
+                const s = db.data.settings;
+
+                let itemsHtml = t.items.map(i => `<tr><td>${i.name}</td><td class="text-center">${i.qty}</td><td class="text-right">${util.rp(i.price)}</td><td class="text-right">${util.rp(i.price*i.qty)}</td></tr>`).join('');
+                
+                const logoHtml = p.logo ? `<img src="${p.logo}" style="max-height:80px; margin-bottom:10px;">` : '';
+
+                util.getEl('print-container').innerHTML = `
+                    <div style="text-align:center; border-bottom:2px solid #000; padding-bottom:1rem; margin-bottom:1.5rem;">
+                        ${logoHtml}
+                        <h2 style="margin:0; font-size:1.8rem;">${p.name||'INVOICE'}</h2>
+                        <p style="margin:0; color:#555;">${p.address||''}</p>
+                        <p style="margin:0; color:#555;">WA: ${p.wa} ${p.email ? '| Email: '+p.email : ''}</p>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; margin-bottom:1.5rem;">
+                        <div>
+                            <p style="margin:0; font-weight:bold;">Tagihan Kepada:</p>
+                            <p style="margin:0;">${c.name}</p>
+                            <p style="margin:0;">WA: ${c.wa}</p>
+                        </div>
+                        <div class="text-right">
+                            <h3 style="margin:0; color:var(--primary);">${t.inv}</h3>
+                            <p style="margin:0;">${util.date(t.date, true)}</p>
+                            <p style="margin:0; margin-top:5px;"><span class="badge ${t.status==='Lunas'?'badge-success':'badge-danger'}">${t.status}</span></p>
+                        </div>
+                    </div>
+                    <table>
+                        <thead><tr><th>Layanan</th><th class="text-center" width="15%">Qty</th><th class="text-right" width="25%">Harga</th><th class="text-right" width="25%">Total</th></tr></thead>
+                        <tbody>${itemsHtml}</tbody>
+                    </table>
+                    <div style="display:flex; justify-content:flex-end;">
+                        <table style="width:50%; margin:0;">
+                            <tr><td>Subtotal</td><td class="text-right">${util.rp(t.sub)}</td></tr>
+                            ${t.disc>0 ? `<tr><td>Diskon</td><td class="text-right">- ${util.rp(t.disc)}</td></tr>` : ''}
+                            ${t.trans>0 ? `<tr><td>Transportasi</td><td class="text-right">+ ${util.rp(t.trans)}</td></tr>` : ''}
+                            <tr><td style="font-size:1.2rem;"><strong>TOTAL</strong></td><td class="text-right" style="font-size:1.2rem;"><strong>${util.rp(t.total)}</strong></td></tr>
+                            <tr><td>Dibayar</td><td class="text-right">${util.rp(t.paid)}</td></tr>
+                            <tr><td>Metode</td><td class="text-right">${t.method}</td></tr>
+                        </table>
+                    </div>
+                    ${t.notes ? `<div style="margin-top:1.5rem; padding:1rem; background:#f8fafc; border-left:4px solid #cbd5e1;"><p style="margin:0;"><strong>Catatan:</strong> ${t.notes}</p></div>` : ''}
+                    <div style="margin-top:3rem; text-align:center; font-style:italic; color:#64748b; font-size:0.9rem;">
+                        <p>${s.thanks}</p>
+                    </div>
+                `;
+
+                const btnWa = util.getEl('btn-share-wa');
+                btnWa.onclick = () => {
+                    const txt = `Halo ${c.name},\nBerikut rincian transaksi Anda di *${p.name||'Massage OS'}*:\n\n*Invoice:* ${t.inv}\n*Tanggal:* ${util.date(t.date)}\n*Total:* ${util.rp(t.total)}\n*Status:* ${t.status}\n\n${s.thanks}`;
+                    window.open(`https://wa.me/${c.wa.replace(/^0/,'62')}?text=${encodeURIComponent(txt)}`, '_blank');
+                };
+
+                app.nav('invoice-detail');
+            }
+        };
+
+        // --- REPORTS ---
+        const reports = {
+            generate: () => {
+                const period = util.val('report-period');
+                const txs = db.data.transactions;
+                const exps = db.data.expenses;
+                const today = new Date(); let fT, fE, tStr;
+
+                if(period==='today') { const d=util.todayStr(); fT=t=>t.date.startsWith(d); fE=e=>e.date===d; tStr="Hari Ini"; }
+                else if(period==='this_week') { const fd=new Date(today.setDate(today.getDate()-today.getDay()+1)); fT=t=>new Date(t.date)>=fd; fE=e=>new Date(e.date)>=fd; tStr="Minggu Ini"; }
+                else if(period==='this_month') { const d=util.todayStr().substring(0,7); fT=t=>t.date.startsWith(d); fE=e=>e.date.startsWith(d); tStr="Bulan Ini"; }
+                else if(period==='this_year') { const d=util.todayStr().substring(0,4); fT=t=>t.date.startsWith(d); fE=e=>e.date.startsWith(d); tStr="Tahun Ini"; }
+                else { fT=()=>true; fE=()=>true; tStr="Semua Waktu"; }
+
+                const fTxs = txs.filter(fT); const fExps = exps.filter(fE);
+                const inc = fTxs.reduce((s,t)=>s+t.total,0);
+                const exp = fExps.reduce((s,e)=>s+e.amount,0);
+                const profit = inc - exp;
+                const piutang = fTxs.filter(t=>t.status==='Belum Lunas').reduce((s,t)=>s+(t.total-t.paid),0);
+                const custs = new Set(fTxs.map(t=>t.customerId)).size;
+
+                util.getEl('report-content').innerHTML = `
+                    <div style="padding:1.5rem; background:var(--bg-surface-hover); border-radius:8px; border:1px solid var(--border);">
+                        <h2 style="margin-top:0; border-bottom:2px solid var(--primary); display:inline-block; margin-bottom:1rem;">Ringkasan: ${tStr}</h2>
+                        <div class="grid grid-2">
+                            <div><p class="text-muted mb-1">Pendapatan Kotor</p><p style="font-size:1.5rem; font-weight:bold; color:var(--primary); margin:0;">${util.rp(inc)}</p></div>
+                            <div><p class="text-muted mb-1">Pengeluaran</p><p style="font-size:1.5rem; font-weight:bold; color:var(--danger); margin:0;">${util.rp(exp)}</p></div>
+                        </div>
+                        <div style="margin-top:1.5rem; padding:1rem; background:var(--bg-surface); border-radius:8px; border:1px dashed var(--border); text-align:center;">
+                            <p class="text-muted mb-1">Laba Bersih</p>
+                            <p style="font-size:2rem; font-weight:bold; margin:0; color:${profit>=0?'var(--success)':'var(--danger)'};">${util.rp(profit)}</p>
+                        </div>
+                        <hr style="margin:1.5rem 0; border:none; border-top:1px solid var(--border);">
+                        <div class="grid grid-2">
+                            <div><p class="text-muted mb-1">Jml Transaksi</p><p class="font-bold" style="font-size:1.2rem;">${fTxs.length}</p></div>
+                            <div><p class="text-muted mb-1">Pelanggan Aktif</p><p class="font-bold" style="font-size:1.2rem;">${custs}</p></div>
+                            <div style="grid-column: span 2;"><p class="text-muted mb-1">Piutang</p><p class="font-bold" style="color:var(--warning); font-size:1.2rem;">${util.rp(piutang)}</p></div>
+                        </div>
+                    </div>
+                `;
+            }
+        };
+
+        // --- SETTINGS & REFERENSI ---
+        const settings = {
+            load: () => {
+                util.setVal('set-inv-prefix', db.data.settings.prefix);
+                util.setVal('set-inv-thanks', db.data.settings.thanks);
+            },
+            saveInv: () => {
+                db.data.settings.prefix = util.val('set-inv-prefix');
+                db.data.settings.thanks = util.val('set-inv-thanks');
+                db.save(); ui.toast('Pengaturan Invoice disimpan');
+            },
+            prepRef: (key) => {
+                util.setVal('mm-key', key);
+                settings.renderRef();
+            },
+            renderRef: () => {
+                const k = util.val('mm-key');
+                const arr = db.data.settings[k] || [];
+                const c = util.getEl('mm-list');
+                c.innerHTML = arr.map((item, i) => `
+                    <div style="display:flex; justify-content:space-between; padding:0.5rem; border-bottom:1px solid var(--border); align-items:center;">
+                        <span>${item}</span><button class="btn btn-sm btn-danger" onclick="settings.delRef('${k}', ${i})">Hapus</button>
+                    </div>
+                `).join('');
+            },
+            addRef: () => {
+                const k = util.val('mm-key'); const val = util.val('mm-input').trim();
+                if(!val) return;
+                if(!db.data.settings[k]) db.data.settings[k] = [];
+                db.data.settings[k].push(val); db.save(); util.setVal('mm-input',''); settings.renderRef();
+            },
+            delRef: (k, i) => { db.data.settings[k].splice(i,1); db.save(); settings.renderRef(); }
+        };
+
+        // --- BACKUP / RESTORE ---
+        const backup = {
+            export: () => {
+                const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(db.data));
+                const a = document.createElement('a'); a.href = dataStr;
+                a.download = `MassageOS-Backup-${util.todayStr()}.json`;
+                a.click(); ui.toast('Backup diunduh');
+            },
+            import: (e) => {
+                const f = e.target.files[0]; if(!f) return;
+                const r = new FileReader();
+                r.onload = (ev) => {
+                    try {
+                        const parsed = JSON.parse(ev.target.result);
+                        if(parsed.settings && parsed.profile) {
+                            ui.confirm('Ganti seluruh data saat ini dengan file backup?', () => {
+                                db.data = parsed; db.save(); ui.toast('Restore berhasil. Memuat ulang...');
+                                setTimeout(()=>window.location.reload(), 1000);
+                            });
+                        } else throw new Error();
+                    } catch(err) { ui.toast('File tidak valid!', true); }
+                };
+                r.readAsText(f); e.target.value = '';
+            },
+            reset: () => {
+                ui.confirm('PERINGATAN! Semua data akan dihapus permanen. Lanjutkan?', () => {
+                    localStorage.removeItem(db.key); ui.toast('Data direset. Memuat ulang...');
+                    setTimeout(()=>window.location.reload(), 1000);
+                });
+            }
+        };
+
+        // INIT
+        document.addEventListener('DOMContentLoaded', app.init);
+    </script>
+</body>
+</html>
+```
